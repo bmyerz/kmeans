@@ -24,16 +24,13 @@ using namespace Grappa;
 
 GlobalCompletionEvent avg_gce;
 
-// Point& average(PointList xs) {
-//     GPoint total = global_alloc<Point>(1);
-//     forall(xs.base, xs.size, [total](Point& p){
-//         delegate::increment<async>(total, p);
-//     }); 
-//     Point result( delegate::read(total) / (double)xs.size );
-//     global_free(total);
-//     return result;
-// }
+ void average(PointList xs, GlobalAddress<Point> avg) {
+     forall<async>(xs.base, xs.size, [total](Point& p){
+         delegate::increment<async>(avg, p/xs.size);  
+     }); 
+ }
 
+/*
 Point& average(PointList xs) {
 
     Point avg(0,0);
@@ -47,6 +44,7 @@ Point& average(PointList xs) {
     DVLOG(0)<<avg << "/" << xs.size << " = " << result;    
     return result;
 }
+*/
 
 struct MinPoint {
     double d = 0;
@@ -194,14 +192,13 @@ void calc_centroids(PointList xs) {
 
     DVLOG(4) << "reset centroids";
 
-    gcentroids->clear();
+
+    gcentroids = global_alloc<Point>(/* gmap counted number of entries */);
 
     gmap->forall_entries([](size_t hash, int vect_idx){
         PointList ps(gvectors[vect_idx]->base, gvectors[vect_idx]->size());
         DVLOG(0) << "call average with a size of " << gvectors[vect_idx]->size();
-        Point avg = average(ps);
-        DVLOG(0) << "avg is " <<    avg;
-        gcentroids->push(avg);
+        average(ps);
     });
     
     std::cout<<"CENTROIDS ARE NOW:: ";
