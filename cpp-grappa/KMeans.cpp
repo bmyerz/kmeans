@@ -198,7 +198,7 @@ void calc_centroids(PointList xs) {
     gmap->forall_entries([](size_t hash, int vect_idx){
         PointList ps(gvectors[vect_idx]->base, gvectors[vect_idx]->size());
         DVLOG(0) << "call average with a size of " << gvectors[vect_idx]->size();
-        average(ps);
+        average(ps, gcentroids+/*cluster id*/);
     });
     
     std::cout<<"CENTROIDS ARE NOW:: ";
